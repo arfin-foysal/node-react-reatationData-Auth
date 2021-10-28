@@ -11,12 +11,12 @@ const signUp= async(req,res)=>{
      const emailExist=await User.findOne({email:email})
 
      if(emailExist){
-         res.status(400).send('Email Already Exist')
+         res.send('Email Already Signup')
      }
     
    const hashPass=await bcript.hash(password,10)
 
-   const token =jwt.sign({userid:User._id},process.env.TOKEN,{ expiresIn: '2h'})
+   const token =jwt.sign({userid:User._id},process.env.TOKEN,{ expiresIn:'2h'})
  
   const user= new User({
       name,
@@ -32,16 +32,14 @@ const signUp= async(req,res)=>{
           token
       })
   } catch (error) {
-      res.json({
-          messages:"this is Sever error",
-         
-      })
+      res.send('Error')
   }
 }
 
 
 
 const logIn= async(req,res)=>{
+   try {
     const {email,password}=req.body
     const user=await User.findOne({email})
     if(!user){
@@ -50,11 +48,14 @@ const logIn= async(req,res)=>{
 
     const validPassword=await bcript.compare(password,user.password)
    if(!validPassword){
-       res.status(400).send('Email Not Resistor')
+       res.status(400).send('Password Dont Currect')
    }
     
-   const token =jwt.sign({userid:user._id},process.env.TOKEN,{ expiresIn: '2h'})
+   const token =jwt.sign({userid:user._id},process.env.TOKEN,{ expiresIn:'2h'})
    res.json({token})
+   } catch (error) {
+       res.send('Server error')
+   }
 
 }
 
@@ -68,6 +69,17 @@ const allUser=async(req,res)=>{
     }
 }
 
+const singalUser=async(req,res)=>{
+     const id=req.params.id
+    try {
+        const users= await User.findById(id).populate("todos")
+        res.status(200).json( {users })
+    } catch (error) {
+        res.status(400).send("sarver Error")
+    }
+}
+
+
 
 
 
@@ -75,5 +87,6 @@ const allUser=async(req,res)=>{
 module.exports={
     signUp,
     logIn,
-    allUser
+    allUser,
+    singalUser
 }
